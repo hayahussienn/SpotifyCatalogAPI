@@ -25,7 +25,7 @@ class LRUCacheTest {
         @Test
         @DisplayName("cache is initially empty")
         void isEmpty() {
-            assertEquals(0, cache.size(), "Cache should be empty initially");
+            assertEquals(0, cache.size(), "Cache should be empty ");
         }
 
         @Test
