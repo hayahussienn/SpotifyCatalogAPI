@@ -66,7 +66,7 @@ public class CatalogUtils {
      * @param songs List of songs (JsonNode objects).
      * @return The longest song.
      */
-    public JsonNode getLongestSong(List<JsonNode> songs) {
+    public static JsonNode getLongestSong(List<JsonNode> songs) {
         return songs.stream()
                 .max(Comparator.comparingInt(song -> song.get("duration_ms").asInt()))
                 .orElse(null);
