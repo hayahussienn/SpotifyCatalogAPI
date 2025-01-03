@@ -12,7 +12,8 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class RateLimitITest {
+public class RateLimitITest
+{
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -34,9 +35,9 @@ public class RateLimitITest {
 
     @Test
     public void testRateLimiterEnforcesLimits() throws InterruptedException {
-        int allowedRequests = 10;
-        int extraRequests = 5;
-
+        int allowedRequests = 10; // Number of allowed requests
+        int extraRequests = 5;    // Additional requests to test exceeding the limit
+        // Send requests within the allowed limit
         for (int i = 0; i < allowedRequests; i++) {
             ResponseEntity<String> response = restTemplate.getForEntity(API_ENDPOINT, String.class);
             assertTrue(response.getStatusCode().equals(HttpStatusCode.valueOf(200)), "Expected status code to be 200 for the first 10 requests");
@@ -44,7 +45,7 @@ public class RateLimitITest {
             String remainingRequests = String.valueOf(allowedRequests - (i + 1));
             assertEquals(remainingRequests, response.getHeaders().get(XRateLimitRemaining).get(0), "Expected " + XRateLimitRemaining + " header to be " + remainingRequests + " after " + i + 1 + " requests");
         }
-
+        // Send requests exceeding the allowed limit
         for (int i = 0; i < extraRequests; i++) {
             ResponseEntity<String> response = restTemplate.getForEntity(API_ENDPOINT, String.class);
             assertTrue(response.getStatusCode().equals(HttpStatusCode.valueOf(429)));
@@ -56,7 +57,7 @@ public class RateLimitITest {
     @Test
     public void testRateLimiterBypassesInternalEndpoint() {
         int totalRequests = 15;
-
+        // Send requests to the internal endpoint which should bypass rate limiting
         for (int i = 0; i < totalRequests; i++) {
             ResponseEntity<String> response = restTemplate.getForEntity(INTERNAL_ENDPOINT, String.class);
             assertTrue(response.getStatusCode().equals(HttpStatusCode.valueOf(200)));
@@ -66,7 +67,7 @@ public class RateLimitITest {
 
     @Test
     public void testRateLimiterAtThreshold() {
-        int allowedRequests = 10;
+        int allowedRequests = 10; // Number of allowed requests
 
         // Send exactly 10 requests, which should hit the rate limit
         for (int i = 0; i < allowedRequests; i++) {
@@ -99,7 +100,6 @@ public class RateLimitITest {
             assertTrue(response.getStatusCode().equals(HttpStatusCode.valueOf(200)),
                     "Expected status code 200 for request " + (i + 1));
         }
-
         // Wait for more than 1 minute to let the rate limit reset
         Thread.sleep(60000); // Wait for 60 seconds
 
@@ -111,6 +111,7 @@ public class RateLimitITest {
 
 //    @Test
 //    public void testRateLimiterDisabled() {
+// this test will pass when we change rate-limit.enabled to false (in application.properties)
 //        // Set rate limiting to be disabled (assuming there's a configuration to turn it off)
 //        System.setProperty("rate-limit.enabled", "false");
 //
@@ -123,6 +124,4 @@ public class RateLimitITest {
 //                    "Expected status code 200 for all requests when rate limit is disabled");
 //        }
 //    }
-
-
 }

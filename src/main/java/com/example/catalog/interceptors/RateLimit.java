@@ -10,7 +10,8 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
-public class RateLimit implements HandlerInterceptor {
+public class RateLimit implements HandlerInterceptor
+{
 
     @Value("${rate-limit.algo}")
     private String rateLimitAlgo;
@@ -35,14 +36,15 @@ public class RateLimit implements HandlerInterceptor {
         if (request.getRequestURI().startsWith("/internal")) {
             return true;
         }
-
+        // Skip rate limiting if disabled
         if (!isRateLimitEnabled) {
-            return true;  // Skip rate limiting if it's disabled
+            return true;
         }
 
         lock.lock();
         try {
-            if (!isAllowed(clientIp)) {
+            if (!isAllowed(clientIp))
+            {
                 // If rate limit is exceeded, inform the client with headers
                 response.setHeader("X-Rate-Limit-Remaining", "0");
                 response.setHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(TIME_WINDOW));
@@ -61,29 +63,54 @@ public class RateLimit implements HandlerInterceptor {
         }
     }
 
-    private boolean isAllowed(String clientIp) {
-        long currentTime = System.currentTimeMillis() / 1000; // Current time in seconds
-        Deque<Long> requests = requestLogs.getOrDefault(clientIp, new LinkedList<>());
+    private boolean isAllowed(String clientIp)
+    {
 
-        // Remove requests older than the time window
-        while (!requests.isEmpty() && requests.peekFirst() <= currentTime - TIME_WINDOW) {
-            requests.pollFirst();  // Remove requests outside the time window
+        if (rateLimitAlgo == "moving" +
+                "") {
+            long currentTime = System.currentTimeMillis() / 1000; // Current time in seconds
+            Deque<Long> requests = requestLogs.getOrDefault(clientIp, new LinkedList<>());
+            // Remove old requests outside the time window
+            while (!requests.isEmpty() && requests.peekFirst() <= currentTime - TIME_WINDOW) {
+                requests.pollFirst();  // Remove requests outside the time window
+            }
+
+            // If the number of requests exceeds the allowed limit block the request
+            if (requests.size() >= rateLimitRPM) {
+                return false;  // Block the request
+            }
+
+            // Add the current request timestamp to the deque
+            requests.addLast(currentTime);
+            requestLogs.put(clientIp, requests);  // Update the request log for the client
+            return true;
+        } else {
+            // Case of fixed window size
+            long currentTimeMillis = System.currentTimeMillis();
+            long windowStartTime = (currentTimeMillis / (TIME_WINDOW * 1000)) * (TIME_WINDOW * 1000);
+
+            // Initialize or retrieve the fixed window for the client
+            Deque<Long> requests = requestLogs.getOrDefault(clientIp, new LinkedList<>());
+            if (requests.isEmpty() || requests.peekFirst() < windowStartTime) {
+                requests.clear(); // Clear requests from the previous window
+            }
+
+            // If the number of requests exceeds the allowed limit, block the request
+            if (requests.size() >= rateLimitRPM)
+            {
+                return false;  // Block the request
+            }
+
+            // Add the current request timestamp to the deque
+            requests.addLast(currentTimeMillis);
+            requestLogs.put(clientIp, requests);  // Update the request log for the client
+            return true;
         }
-
-        // If the number of requests exceeds the allowed limit, block the request
-        if (requests.size() >= rateLimitRPM) {
-            return false;  // Block the request
-        }
-
-        // Add the current request timestamp to the deque
-        requests.addLast(currentTime);
-        requestLogs.put(clientIp, requests);  // Update the request log for the client
-        return true;
     }
 
-    
-
-    public void resetRequestLogs() {
+    // Clear all stored request logs
+    public void resetRequestLogs()
+    {
         requestLogs.clear();
     }
 }
