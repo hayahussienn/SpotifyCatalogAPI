@@ -1,4 +1,4 @@
-package com.example.catalog;
+package serviceTests;
 
 import com.example.catalog.model.Song;
 import com.example.catalog.services.JSONDataSourceService;
