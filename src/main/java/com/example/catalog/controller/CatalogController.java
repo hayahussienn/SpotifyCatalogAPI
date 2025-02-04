@@ -27,7 +27,7 @@ import com.example.catalog.model.Artist;
 
 @RestController
 public class CatalogController {
-
+/*
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CatalogUtils catalogUtils = new CatalogUtils();
 
@@ -255,7 +255,7 @@ public class CatalogController {
         return ResponseEntity.ok("CatalogController is working!");
     }
 
-
+/*
     @PostMapping("/artists")
     public ResponseEntity<JsonNode> addArtist(@RequestBody Artist artist) {
         try {
@@ -305,5 +305,7 @@ public class CatalogController {
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+ */
 
 }

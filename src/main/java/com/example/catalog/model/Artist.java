@@ -11,6 +11,8 @@ public class Artist {
     private int popularity;
     private String uri;
 
+
+
     public String getId() {
         return id;
     }

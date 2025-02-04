@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Objects;
-
+/*
 @Configuration
 public class RequestInterceptorConfig implements WebMvcConfigurer {
 
@@ -26,3 +26,5 @@ public class RequestInterceptorConfig implements WebMvcConfigurer {
         }
     }
 }
+
+ */

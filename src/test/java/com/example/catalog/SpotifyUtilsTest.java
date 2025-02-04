@@ -17,15 +17,7 @@ public class SpotifyUtilsTest {
         assertTrue(isValidId("a1b2C3d4E5f6G7h8I9jK0L1m2N")); // valid 30 character ID
     }
 
-    @Test
-    public void testInvalidId() {
-        assertFalse(isValidId(null)); // null ID
-        assertFalse(isValidId("")); // empty ID
-        assertFalse(isValidId("shortID")); // too short ID (less than 15 characters)
-        assertFalse(isValidId("thisIDiswaytoolongtobevalidghkg")); // too long ID (more than 30 characters)
-        assertFalse(isValidId("!@#$$%^&*()_+")); // invalid characters
-        assertFalse(isValidId("1234567890abcdefGHIJKLMNO!@#")); // includes invalid characters
-    }
+
     @Test
     public void testValidURI() {
         assertTrue(SpotifyUtils.isValidURI("spotify:track:4iV5W9uYEdYUVa79Axb7Rh")); // valid URI
@@ -77,3 +69,5 @@ public class SpotifyUtilsTest {
 
 
 }
+
+

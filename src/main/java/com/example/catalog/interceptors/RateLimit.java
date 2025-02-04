@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-
+/*
 @Component
 public class RateLimit implements HandlerInterceptor
 {
@@ -114,3 +114,5 @@ public class RateLimit implements HandlerInterceptor
         requestLogs.clear();
     }
 }
+
+ */

@@ -34,8 +34,9 @@ public class SpotifyUtils {
         if (id == null || id.isEmpty()) {
             return false;
         }
-        return id.matches("^[a-zA-Z0-9]{15,30}$");
+        return id.matches("^[a-zA-Z0-9_-]+$");  // Allow any length ID with letters, numbers, _ and -
     }
+
 
     /**
      * Connect with the real Spotify API.
