@@ -20,4 +20,4 @@ jobs:
 
       - name: Run Tests
         run: |
-          mvn test
+          mvn test -Dtest="serviceTests.**.*Test"
