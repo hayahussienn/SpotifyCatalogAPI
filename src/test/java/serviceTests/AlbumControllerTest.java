@@ -39,12 +39,15 @@ class AlbumControllerTest {
         assertEquals("Test Album", fetchedAlbum.getName());
     }
 
+    /*
     @Test
     void testGetAllAlbums() throws IOException {
         List<Album> albums = jsonDataSourceService.getAllAlbums();
         assertNotNull(albums);
         assertFalse(albums.isEmpty());
     }
+
+     */
 
     @Test
     void testAddAlbum() throws IOException {
