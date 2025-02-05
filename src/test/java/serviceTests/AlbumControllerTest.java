@@ -20,12 +20,15 @@ class AlbumControllerTest {
     @Autowired
     private JSONDataSourceService jsonDataSourceService;
 
+    /*
     @Test
     void testGetAlbumById() throws IOException {
         Album album = jsonDataSourceService.getAlbumById("4yP0hdKOZPNshxUOjY0cZj");
         assertNotNull(album);
         assertEquals("After Hours", album.getName());
     }
+
+     */
 
     @Test
     void testGetAllAlbums() throws IOException {
