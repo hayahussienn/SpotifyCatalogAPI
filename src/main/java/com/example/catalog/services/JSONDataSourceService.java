@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class JSONDataSourceService implements DataSourceService {
@@ -214,6 +216,126 @@ public class JSONDataSourceService implements DataSourceService {
             }
         }
     }
+
+
+    @Override
+    public List<Track> getAlbumTracks(String albumId) throws IOException {
+        JsonNode albums = loadJsonData(albumsJsonFilePath);
+        JsonNode albumNode = albums.get(albumId);
+        if (albumNode != null && albumNode.has("tracks")) {
+            return objectMapper.readValue(albumNode.get("tracks").toString(), objectMapper.getTypeFactory().constructCollectionType(List.class, Track.class));
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Track addTrackToAlbum(String albumId, Track track) throws IOException {
+        JsonNode albums = loadJsonData(albumsJsonFilePath);
+        JsonNode albumNode = albums.get(albumId);
+        if (albumNode != null) {
+            ArrayNode tracksArray = (ArrayNode) albumNode.get("tracks");
+            if (tracksArray == null) {
+                tracksArray = objectMapper.createArrayNode();
+                ((ObjectNode) albumNode).set("tracks", tracksArray);
+            }
+            tracksArray.add(objectMapper.valueToTree(track));
+            writeJsonData(albumsJsonFilePath, albums);
+            return track;
+        }
+        return null;
+    }
+
+
+    @Override
+    public Track updateAlbumTrack(String albumId, Track track) throws IOException {
+        JsonNode albums = loadJsonData(albumsJsonFilePath);
+        JsonNode albumNode = albums.get(albumId);
+        if (albumNode != null && albumNode.has("tracks")) {
+            ArrayNode tracksArray = (ArrayNode) albumNode.get("tracks");
+            for (int i = 0; i < tracksArray.size(); i++) {
+                JsonNode trackNode = tracksArray.get(i);
+                if (trackNode.get("id").asText().equals(track.getId())) {
+                    tracksArray.set(i, objectMapper.valueToTree(track));
+                    writeJsonData(albumsJsonFilePath, albums);
+                    return track;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public boolean deleteAlbumTrack(String albumId, String trackId) throws IOException {
+        JsonNode albums = loadJsonData(albumsJsonFilePath);
+        JsonNode albumNode = albums.get(albumId);
+        if (albumNode != null && albumNode.has("tracks")) {
+            ArrayNode tracksArray = (ArrayNode) albumNode.get("tracks");
+            for (int i = 0; i < tracksArray.size(); i++) {
+                JsonNode trackNode = tracksArray.get(i);
+                if (trackNode.get("id").asText().equals(trackId)) {
+                    tracksArray.remove(i);
+                    writeJsonData(albumsJsonFilePath, albums);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+    @Override
+    public List<Album> getArtistAlbums(String artistId) throws IOException {
+        JsonNode songs = loadJsonData(songsJsonFilePath);
+        JsonNode albums = loadJsonData(albumsJsonFilePath);
+
+        Set<String> albumIds = new HashSet<>();
+        List<Album> artistAlbums = new ArrayList<>();
+
+        // Step 1: Find albums where the artist has songs
+        for (JsonNode songNode : songs) {
+            if (songNode.has("artists")) {
+                for (JsonNode artistNode : songNode.get("artists")) {
+                    if (artistNode.get("id").asText().equals(artistId)) {
+                        String albumId = songNode.get("album").get("id").asText();
+                        albumIds.add(albumId);
+                    }
+                }
+            }
+        }
+
+        // Step 2: Retrieve album details from albums.json
+        for (String albumId : albumIds) {
+            JsonNode albumNode = albums.get(albumId);
+            if (albumNode != null) {
+                artistAlbums.add(objectMapper.treeToValue(albumNode, Album.class));
+            }
+        }
+
+        return artistAlbums;
+    }
+
+
+    @Override
+    public List<Song> getArtistSongs(String artistId) throws IOException {
+        JsonNode songs = loadJsonData(songsJsonFilePath);
+        List<Song> artistSongs = new ArrayList<>();
+
+        for (JsonNode songNode : songs) {
+            if (songNode.has("artists")) {
+                for (JsonNode artistNode : songNode.get("artists")) {
+                    if (artistNode.get("id").asText().equals(artistId)) {
+                        artistSongs.add(objectMapper.treeToValue(songNode, Song.class));
+                        break; // Add song only once
+                    }
+                }
+            }
+        }
+
+        return artistSongs;
+    }
+
 
     // ======== HELPER METHODS ========
     private JsonNode loadJsonData(String filePath) throws IOException {

@@ -30,14 +30,17 @@ public interface DataSourceService {
     void deleteSong(String id) throws IOException;
 
 
-    /*
+
     List<Track> getAlbumTracks(String albumId) throws IOException;
     Track addTrackToAlbum(String albumId, Track track) throws IOException;
     Track updateAlbumTrack(String albumId, Track track) throws IOException;
     boolean deleteAlbumTrack(String albumId, String trackId) throws IOException;
 
+
     List<Album> getArtistAlbums(String artistId) throws IOException;
     List<Song> getArtistSongs(String artistId) throws IOException;
 
-     */
+
+
+
 }

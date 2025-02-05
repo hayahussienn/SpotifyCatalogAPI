@@ -2,7 +2,9 @@ package serviceTests;
 
 import com.example.catalog.Application;
 import com.example.catalog.model.Album;
+import com.example.catalog.model.Track;
 import com.example.catalog.services.JSONDataSourceService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,15 +22,22 @@ class AlbumControllerTest {
     @Autowired
     private JSONDataSourceService jsonDataSourceService;
 
-    /*
-    @Test
-    void testGetAlbumById() throws IOException {
-        Album album = jsonDataSourceService.getAlbumById("4yP0hdKOZPNshxUOjY0cZj");
-        assertNotNull(album);
-        assertEquals("After Hours", album.getName());
+    private final String testAlbumId = "test-album-unique";
+
+    @AfterEach
+    void cleanUp() throws IOException {
+        jsonDataSourceService.deleteAlbum(testAlbumId);
     }
 
-     */
+    @Test
+    void testGetAlbumById() throws IOException {
+        Album album = new Album(testAlbumId, "Test Album", "spotify:album:" + testAlbumId, "2024-02-04", 10, null, null);
+        jsonDataSourceService.createAlbum(album);
+
+        Album fetchedAlbum = jsonDataSourceService.getAlbumById(testAlbumId);
+        assertNotNull(fetchedAlbum);
+        assertEquals("Test Album", fetchedAlbum.getName());
+    }
 
     @Test
     void testGetAllAlbums() throws IOException {
@@ -39,37 +48,36 @@ class AlbumControllerTest {
 
     @Test
     void testAddAlbum() throws IOException {
-        Album album = new Album("test-album-1", "Test Album", "spotify:album:test-album-1", "2024-02-04", 10, null, null);
+        Album album = new Album(testAlbumId, "Test Album", "spotify:album:" + testAlbumId, "2024-02-04", 10, null, null);
         jsonDataSourceService.createAlbum(album);
 
-        Album fetchedAlbum = jsonDataSourceService.getAlbumById("test-album-1");
+        Album fetchedAlbum = jsonDataSourceService.getAlbumById(testAlbumId);
         assertNotNull(fetchedAlbum);
         assertEquals("Test Album", fetchedAlbum.getName());
     }
 
     @Test
     void testUpdateAlbum() throws IOException {
-        //Create the album to ensure it exists
-        Album album = new Album("test-album-1", "Original Album Name", "spotify:album:test-album-1", "2024-02-01", 10, null, null);
+        Album album = new Album(testAlbumId, "Original Name", "spotify:album:" + testAlbumId, "2024-02-01", 10, null, null);
         jsonDataSourceService.createAlbum(album);
 
-        // Update the album
-        album.setName("Updated Album Name");
-        jsonDataSourceService.updateAlbum("test-album-1", album);
+        album.setName("Updated Name");
+        jsonDataSourceService.updateAlbum(testAlbumId, album);
 
-        // Fetch the updated album
-        Album updatedAlbum = jsonDataSourceService.getAlbumById("test-album-1");
-
-        // Assert that the update worked
+        Album updatedAlbum = jsonDataSourceService.getAlbumById(testAlbumId);
         assertNotNull(updatedAlbum);
-        assertEquals("Updated Album Name", updatedAlbum.getName());
+        assertEquals("Updated Name", updatedAlbum.getName());
     }
 
     @Test
     void testDeleteAlbum() throws IOException {
-        jsonDataSourceService.deleteAlbum("test-album-1");
-        Album deletedAlbum = jsonDataSourceService.getAlbumById("test-album-1");
+        Album album = new Album(testAlbumId, "To Delete", "spotify:album:" + testAlbumId, "2024-02-04", 10, null, null);
+        jsonDataSourceService.createAlbum(album);
+
+        jsonDataSourceService.deleteAlbum(testAlbumId);
+        Album deletedAlbum = jsonDataSourceService.getAlbumById(testAlbumId);
 
         assertNull(deletedAlbum);
     }
+
 }

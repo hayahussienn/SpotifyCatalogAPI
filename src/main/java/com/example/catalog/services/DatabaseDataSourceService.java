@@ -89,7 +89,7 @@ public class DatabaseDataSourceService implements DataSourceService {
         // No operation
     }
 
-    /*
+
     public List<Track> getAlbumTracks(String albumId) throws IOException {
         return null;
     }
@@ -106,6 +106,8 @@ public class DatabaseDataSourceService implements DataSourceService {
         return false;
     }
 
+
+
     public List<Album> getArtistAlbums(String artistId) throws IOException {
         return null;
     }
@@ -114,5 +116,7 @@ public class DatabaseDataSourceService implements DataSourceService {
         return null;
     }
 
-     */
+
+
+
 }

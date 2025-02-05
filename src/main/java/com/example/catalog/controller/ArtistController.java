@@ -2,7 +2,9 @@
 
 package com.example.catalog.controller;
 
+import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
+import com.example.catalog.model.Song;
 import com.example.catalog.services.DataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +52,17 @@ public class ArtistController {
     public ResponseEntity<Void> deleteArtist(@PathVariable String id) throws IOException {
         dataSourceService.deleteArtist(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/albums")
+    public ResponseEntity<List<Album>> getArtistAlbums(@PathVariable String id) throws IOException {
+        List<Album> albums = dataSourceService.getArtistAlbums(id);
+        return albums != null ? ResponseEntity.ok(albums) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}/songs")
+    public ResponseEntity<List<Song>> getArtistSongs(@PathVariable String id) throws IOException {
+        List<Song> songs = dataSourceService.getArtistSongs(id);
+        return songs != null ? ResponseEntity.ok(songs) : ResponseEntity.notFound().build();
     }
 }

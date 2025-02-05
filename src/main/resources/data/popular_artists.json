@@ -1901,6 +1901,15 @@
     "popularity" : 96,
     "uri" : "spotify:artist:1Xyo4u8uXC1ZmMpatF05PJ"
   },
+  "test-artist-2" : {
+    "id" : "test-artist-2",
+    "name" : "Another Test Artist",
+    "followers" : 0,
+    "genres" : null,
+    "images" : null,
+    "popularity" : 0,
+    "uri" : null
+  },
   "test-artist-1" : {
     "id" : "test-artist-1",
     "name" : "Test Artist",

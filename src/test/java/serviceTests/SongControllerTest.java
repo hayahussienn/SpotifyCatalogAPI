@@ -3,6 +3,8 @@ package serviceTests;
 import com.example.catalog.Application;
 import com.example.catalog.model.Song;
 import com.example.catalog.services.JSONDataSourceService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,73 +22,76 @@ class SongControllerTest {
     @Autowired
     private JSONDataSourceService jsonDataSourceService;
 
+    private final String testSongId = "test-song-1";
+
+    @BeforeEach
+    void setUp() throws IOException {
+        // Ensure a clean state by deleting any existing test data
+        jsonDataSourceService.deleteSong(testSongId);
+
+        // Create a song for testing
+        Song song = new Song(testSongId, "Initial Test Song", 200000, 85, "spotify:song:" + testSongId, null, null);
+        jsonDataSourceService.createSong(song);
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        // Clean up after each test
+        jsonDataSourceService.deleteSong(testSongId);
+    }
+
     @Test
     void testGetSongById() throws IOException {
-        Song song = jsonDataSourceService.getSongById("5PjdY0CKGZdEuoNab3yDmX");
-        assertNotNull(song);
-        assertEquals("STAY (with Justin Bieber)", song.getName());
-
-
+        Song song = jsonDataSourceService.getSongById(testSongId);
+        assertNotNull(song, "The song should exist.");
+        assertEquals("Initial Test Song", song.getName(), "Song name should match the initial value.");
     }
 
     @Test
     void testGetAllSongs() throws IOException {
         List<Song> songs = jsonDataSourceService.getAllSongs();
-        assertNotNull(songs);
-        assertFalse(songs.isEmpty());
+        assertNotNull(songs, "The song list should not be null.");
+        assertFalse(songs.isEmpty(), "The song list should not be empty.");
     }
 
     @Test
     void testAddSong() throws IOException {
-        String uniqueId = "test-song-" + System.currentTimeMillis(); // Unique ID
-        Song song = new Song(uniqueId, "Test Song", 200000, 90, "spotify:song:" + uniqueId, null, null);
+        String uniqueId = "test-song-" + System.currentTimeMillis(); // Unique ID for each run
+        Song song = new Song(uniqueId, "New Test Song", 180000, 90, "spotify:song:" + uniqueId, null, null);
         jsonDataSourceService.createSong(song);
 
         Song fetchedSong = jsonDataSourceService.getSongById(uniqueId);
-        assertNotNull(fetchedSong);
-        assertEquals("Test Song", fetchedSong.getName());
+        assertNotNull(fetchedSong, "The newly added song should exist.");
+        assertEquals("New Test Song", fetchedSong.getName(), "Song name should match the added value.");
+
+        // Clean up
+        jsonDataSourceService.deleteSong(uniqueId);
     }
 
     @Test
     void testUpdateSong() throws IOException {
-        // Clean up if the song exists to avoid duplicate ID error
-        Song existingSong = jsonDataSourceService.getSongById("test-song-1");
-        if (existingSong != null) {
-            jsonDataSourceService.deleteSong("test-song-1");
-        }
+        Song song = jsonDataSourceService.getSongById(testSongId);
+        assertNotNull(song, "The song should exist before updating.");
 
-        // Create a fresh song
-        Song song = new Song("test-song-1", "Original Song", 200000, 90, "spotify:song:test-song-1", null, null);
-        jsonDataSourceService.createSong(song);
+        song.setName("Updated Test Song");
+        jsonDataSourceService.updateSong(testSongId, song);
 
-        // Update the song
-        Song updatedSong = new Song("test-song-1", "Updated Song Name", 210000, 95, "spotify:song:test-song-1", null, null);
-        jsonDataSourceService.updateSong("test-song-1", updatedSong);
-
-        // Verify the update
-        Song fetchedSong = jsonDataSourceService.getSongById("test-song-1");
-        assertNotNull(fetchedSong);
-        assertEquals("Updated Song Name", fetchedSong.getName());
+        Song updatedSong = jsonDataSourceService.getSongById(testSongId);
+        assertNotNull(updatedSong, "The updated song should exist.");
+        assertEquals("Updated Test Song", updatedSong.getName(), "The song name should reflect the updated value.");
     }
 
     @Test
     void testDeleteSong() throws IOException {
-        // Clean up if the song already exists
-        jsonDataSourceService.deleteSong("testifQCjDGFmkHkpNLD9h");
+        // Ensure the song exists before deletion
+        Song song = jsonDataSourceService.getSongById(testSongId);
+        assertNotNull(song, "The song should exist before deletion.");
 
-        // Add a song to ensure it exists before deletion
-        Song song = new Song("testifQCjDGFmkHkpNLD9h", "Test Song2", 180000, 85, "spotify:song:test", null, null);
-        jsonDataSourceService.createSong(song);
-
-        // Verify song exists before deletion
-        Song existingSong = jsonDataSourceService.getSongById("testifQCjDGFmkHkpNLD9h");
-        assertNotNull(existingSong); // Confirm song exists
-
-        // Perform deletion
-        jsonDataSourceService.deleteSong("testifQCjDGFmkHkpNLD9h");
+        // Delete the song
+        jsonDataSourceService.deleteSong(testSongId);
 
         // Verify deletion
-        Song deletedSong = jsonDataSourceService.getSongById("testifQCjDGFmkHkpNLD9h");
-        assertNull(deletedSong); // Confirm song was deleted
+        Song deletedSong = jsonDataSourceService.getSongById(testSongId);
+        assertNull(deletedSong, "The song should not exist after deletion.");
     }
 }

@@ -100,35 +100,39 @@ public class SpotifyAPIDataSourceService implements DataSourceService {
         throw new UnsupportedOperationException("Deleting an album is not supported by Spotify API.");
     }
 
-    // ======== SONG OPERATIONS ========
     @Override
     public Song getSongById(String id) throws IOException {
-        String url = spotifyApiBaseUrl + "/tracks/" + id;  // Ensure this matches Spotify's API format
+        String url = spotifyApiBaseUrl + "/tracks/" + id;
 
         try {
-            // Sending GET request to the Spotify API
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     createHttpEntity(),
-                    Map.class
+                    (Class<Map<String, Object>>) (Class<?>) Map.class
             );
 
-            // Check if the response has a valid body
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return mapToSong(response.getBody());  // Convert API response to Song model
+                return mapToSong(response.getBody()); // Map the API response to the Song model
             } else {
                 throw new IOException("Unexpected response from Spotify API: " + response.getStatusCode());
             }
 
         } catch (HttpClientErrorException.NotFound e) {
-            throw new IOException("Song not found with ID: " + id);
+            throw new IOException("Song not found with ID: " + id, e);
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new IOException("Unauthorized request. Check your Bearer token.", e);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IOException("Invalid song ID format: " + id, e);
         } catch (HttpClientErrorException e) {
-            throw new IOException("Error fetching song: " + e.getResponseBodyAsString());
+            throw new IOException("Error fetching song: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             throw new IOException("Unexpected error occurred: " + e.getMessage(), e);
         }
     }
+
+
+
 
     @Override
     public List<Song> getAllSongs() {
@@ -149,24 +153,41 @@ public class SpotifyAPIDataSourceService implements DataSourceService {
     public void deleteSong(String id) {
         throw new UnsupportedOperationException("Deleting a song is not supported by Spotify API.");
     }
-/*
+
     // ======== TRACK OPERATIONS ========
     @Override
     public List<Track> getAlbumTracks(String albumId) throws IOException {
         String url = spotifyApiBaseUrl + "/albums/" + albumId + "/tracks";
-        try {
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, createHttpEntity(), Map.class);
-            List<Map<String, Object>> tracksData = (List<Map<String, Object>>) response.getBody().get("items");
 
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    createHttpEntity(),
+                    (Class<Map<String, Object>>) (Class<?>) Map.class
+            );
+
+            List<Map<String, Object>> tracksData = (List<Map<String, Object>>) response.getBody().get("items");
             List<Track> tracks = new ArrayList<>();
+
             if (tracksData != null) {
                 for (Map<String, Object> trackData : tracksData) {
                     tracks.add(mapToTrack(trackData));
                 }
             }
+
             return tracks;
+
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new IOException("Album not found with ID: " + albumId, e);
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new IOException("Unauthorized request. Check your Bearer token.", e);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IOException("Invalid album ID format: " + albumId, e);
         } catch (HttpClientErrorException e) {
-            throw new IOException("Error fetching album tracks: " + e.getMessage());
+            throw new IOException("Error fetching album tracks: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            throw new IOException("Unexpected error occurred: " + e.getMessage(), e);
         }
     }
 
@@ -184,6 +205,7 @@ public class SpotifyAPIDataSourceService implements DataSourceService {
     public boolean deleteAlbumTrack(String albumId, String trackId) {
         throw new UnsupportedOperationException("Deleting an album track is not supported by Spotify API.");
     }
+
 
     @Override
     public List<Album> getArtistAlbums(String artistId) throws IOException {
@@ -209,7 +231,8 @@ public class SpotifyAPIDataSourceService implements DataSourceService {
         throw new UnsupportedOperationException("Fetching songs by artist is not supported directly by Spotify API.");
     }
 
- */
+
+
 
     // ======== MAPPING METHODS ========
     private Artist mapToArtist(Map<String, Object> data) {
@@ -281,13 +304,28 @@ public class SpotifyAPIDataSourceService implements DataSourceService {
         return song;
     }
 
+
     private Track mapToTrack(Map<String, Object> data) {
         Track track = new Track();
         track.setId((String) data.get("id"));
         track.setName((String) data.get("name"));
-        track.setDuration_ms((long) data.getOrDefault("duration_ms", 0));
-        track.setExplicit((boolean) data.getOrDefault("explicit", false));
+
+        // ✅ Safely handle duration_ms conversion
+        Object durationObj = data.get("duration_ms");
+        if (durationObj instanceof Integer) {
+            track.setDuration_ms(((Integer) durationObj).longValue());
+        } else if (durationObj instanceof Long) {
+            track.setDuration_ms((Long) durationObj);
+        } else {
+            track.setDuration_ms(0L);  // Default value if missing
+        }
+
+        // ✅ Handle explicit field safely
+        Object explicitObj = data.get("explicit");
+        track.setExplicit(explicitObj instanceof Boolean ? (Boolean) explicitObj : false);
+
         track.setUri((String) data.get("uri"));
         return track;
     }
+
 }
