@@ -1,5 +1,6 @@
 package serviceTests;
 
+import com.example.catalog.Application;
 import com.example.catalog.model.Artist;
 import com.example.catalog.services.JSONDataSourceService;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 class ArtistControllerTest {
 
