@@ -1,0 +1,27 @@
+name: JMeter Load Test
+
+on:
+  push:
+    branches:
+      - main  # Runs when pushing to main
+
+jobs:
+  run-jmeter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Fetch latest code
+
+      - name: Run JMeter Action
+        uses: rbhadti94/apache-jmeter-action@v0.5.0  # JMeter GitHub Action
+        with:
+          testFilePath: test/sample_test.jmx  # Directly using extracted JMeter test file
+          outputReportsFolder: reports/  # Save reports here
+          args: "--loglevel INFO"
+
+      - name: Upload JMeter Results
+        uses: actions/upload-artifact@v3  # Upload test results
+        with:
+          name: jmeter-test-results
+          path: reports/
