@@ -16,12 +16,12 @@ jobs:
       - name: Run JMeter Action
         uses: rbhadti94/apache-jmeter-action@v0.5.0  # JMeter GitHub Action
         with:
-          testFilePath: test/sample_test.jmx  # JMeter test file
+          testFilePath: test/spotify-catalog-api-tests.jmx
           outputReportsFolder: reports/  # Save reports here
           args: "--loglevel INFO"
 
       - name: Upload JMeter Results
-        uses: actions/upload-artifact@v4  # ✅ Updated to version 4
+        uses: actions/upload-artifact@v4
         with:
           name: jmeter-test-results
           path: reports/
