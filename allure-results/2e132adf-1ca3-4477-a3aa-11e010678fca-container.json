@@ -1,0 +1,1 @@
+{"uuid":"2e132adf-1ca3-4477-a3aa-11e010678fca","name":"evicts the least recently used element when the cache exceeds its capacity","children":["63129b22-5f08-48be-9d60-4536e699ad06"],"befores":[],"afters":[],"start":1739867588728,"stop":1739867588732}

@@ -1,0 +1,9 @@
+[ {
+  "id" : "7qiZfU4dY1lWllzX7mPBI8",
+  "name" : "New Song",
+  "durationMs" : 210000,
+  "popularity" : 85,
+  "uri" : "spotify:song:song123",
+  "album" : null,
+  "artists" : null
+} ]

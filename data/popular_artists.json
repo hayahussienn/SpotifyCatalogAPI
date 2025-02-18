@@ -1,0 +1,20 @@
+{
+  "newId" : {
+    "id" : "newId",
+    "name" : "New Artist Name",
+    "followers" : 0,
+    "genres" : null,
+    "images" : null,
+    "popularity" : 0,
+    "uri" : null
+  },
+  "test123" : {
+    "id" : "test123",
+    "name" : "Test Artist",
+    "followers" : 0,
+    "genres" : null,
+    "images" : null,
+    "popularity" : 0,
+    "uri" : null
+  }
+}
